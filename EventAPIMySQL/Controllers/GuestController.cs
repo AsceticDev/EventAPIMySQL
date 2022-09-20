@@ -1,5 +1,5 @@
 ﻿using EventAPIMySQL.Data;
-using EventAPIMySQL.Dtos;
+using EventAPIMySQL.Dtos.Guest;
 using EventAPIMySQL.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,18 +17,19 @@ namespace EventAPIMySQL.Controllers
             _context = context;
         }
 
-        //Get a single Guest by ID
+        //Get ALL Guests
         [HttpGet]
-        public async Task<ActionResult<List<Guest>>> Get()
+        public async Task<ActionResult<List<ReadGuestDto>>> Get()
         {
             var guests = await _context.Guests
                 .Include(c => c.Allergies)
                 .Include(c => c.Events)
                 .ToListAsync();
 
-            return guests;
+            return Ok(guests);
         }
 
+        //Get a single Guest by ID
         [HttpGet("{guestId}", Name="GetGuest")]
         public async Task<ActionResult<List<Guest>>> Get(int guestId)
         {
@@ -38,9 +39,10 @@ namespace EventAPIMySQL.Controllers
                 .Include(c => c.Events)
                 .ToListAsync();
 
-            return guest;
+            return Ok(guest);
         }
 
+        //Create A Guest
         [HttpPost]
         public async Task<ActionResult<Guest>> CreateGuest(CreateGuestDto request)
         {
@@ -50,13 +52,14 @@ namespace EventAPIMySQL.Controllers
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 Email = request.Email,
-                DateOfBirth = request.DateOfBirth
+                DateOfBirth = request.DateOfBirth,
+                //Allergies = request.
             };
 
             _context.Guests.Add(newGuest);
             await _context.SaveChangesAsync();
 
-            return newGuest;
+            return Ok(await _context.Guests.ToListAsync());
 
         }
     }

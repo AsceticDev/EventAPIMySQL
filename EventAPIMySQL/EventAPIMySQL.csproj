@@ -17,4 +17,12 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="F:\repos\dotnet\EventAPIMySQL\EventAPIMySQL\Dtos\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="F:\repos\dotnet\EventAPIMySQL\EventAPIMySQL\Dtos\.editorconfig" />
+  </ItemGroup>
+
 </Project>
