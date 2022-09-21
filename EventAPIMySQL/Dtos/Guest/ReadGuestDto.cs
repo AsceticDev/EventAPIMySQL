@@ -17,6 +17,7 @@ namespace EventAPIMySQL.Dtos.Guest
 
         //wouldnt add events when creating a character
         public List<ReadEventDto> Events { get; set; }
-
     }
 }
+
+

@@ -1,4 +1,5 @@
 ﻿using EventAPIMySQL.Data;
+using EventAPIMySQL.Dtos.Allergy;
 using EventAPIMySQL.Dtos.Guest;
 using EventAPIMySQL.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -26,20 +27,45 @@ namespace EventAPIMySQL.Controllers
                 .Include(c => c.Events)
                 .ToListAsync();
 
-            return Ok(guests);
+            var readGuestsDto = guests
+                .Select(x => ToReadGuestDto(x))
+                .ToList();
+
+            return Ok(readGuestsDto);
         }
 
         //Get a single Guest by ID
-        [HttpGet("{guestId}", Name="GetGuest")]
+        [HttpGet("{guestId}", Name = "GetGuest")]
         public async Task<ActionResult<List<Guest>>> Get(int guestId)
         {
-            var guest = await _context.Guests
+            var data = await _context.Guests
+                .Include(c=>c.Allergies)
+                .Include(c=>c.Events)
+                .FirstOrDefaultAsync(x => x.Id == guestId);
+            if (data == null) return NotFound();
+
+            var dataDto = new ReadGuestDto()
+            {
+                Id = data.Id,
+                FirstName = data.FirstName,
+                LastName = data.LastName,
+                Email = data.Email,
+                DateOfBirth = data.DateOfBirth
+            };
+
+            foreach (var allergy in data.Allergies)
+            {
+                Console.WriteLine(allergy.AllergyType);
+            }
+            /*
+              var guest = await _context.Guests
                 .Where(c => c.Id == guestId)
                 .Include(c => c.Allergies)
                 .Include(c => c.Events)
                 .ToListAsync();
+            */
 
-            return Ok(guest);
+            return Ok(dataDto);
         }
 
         //Create A Guest
@@ -60,7 +86,30 @@ namespace EventAPIMySQL.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(await _context.Guests.ToListAsync());
-
         }
+
+        //extension methods
+        public static ReadGuestDto ToReadGuestDto(Guest guest)
+        {
+            return new ReadGuestDto()
+            {
+                Id = guest.Id,
+                FirstName = guest.FirstName,
+                LastName = guest.LastName,
+                Email = guest.Email,
+                DateOfBirth = guest.DateOfBirth,
+                Allergies = guest.Allergies.Select(a => ToReadAllergyDto(a)).ToList()
+            };
+        }
+
+        public static ReadAllergyDto ToReadAllergyDto(Allergy allergy)
+        {
+            return new ReadAllergyDto()
+            {
+                AllergyType = allergy.AllergyType
+            };
+        }
+
+
     }
 }
