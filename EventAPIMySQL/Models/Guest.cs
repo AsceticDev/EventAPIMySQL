@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EventAPIMySQL.Dtos.Guest;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace EventAPIMySQL.Models
 {
-    [Index(nameof(Email), IsUnique = true)]
+    [Index(nameof(Guest.Email), IsUnique=true)]
     public class Guest
     {
         public int Id { get; set; }
@@ -20,4 +21,5 @@ namespace EventAPIMySQL.Models
         //wouldnt add events when creating a character
         public List<Event> Events { get; set; } = new List<Event>();
     }
+
 }

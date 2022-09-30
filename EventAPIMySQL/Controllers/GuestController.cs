@@ -28,7 +28,8 @@ namespace EventAPIMySQL.Controllers
                 .ToListAsync();
 
             var readGuestsDto = guests
-                .Select(x => ToReadGuestDto(x))
+                //.Select(x => ToReadGuestDto(x))
+                .Select(x => x.ToReadGuestDto())
                 .ToList();
 
             return Ok(readGuestsDto);
@@ -36,24 +37,25 @@ namespace EventAPIMySQL.Controllers
 
         //Get a single Guest by ID
         [HttpGet("{guestId}", Name = "GetGuest")]
-        public async Task<ActionResult<List<Guest>>> Get(int guestId)
+        public async Task<ActionResult<ReadGuestDto>> Get(int guestId)
         {
-            var data = await _context.Guests
+            var guest = await _context.Guests
                 .Include(c=>c.Allergies)
                 .Include(c=>c.Events)
                 .FirstOrDefaultAsync(x => x.Id == guestId);
-            if (data == null) return NotFound();
+            if (guest == null) return NotFound();
 
-            var dataDto = new ReadGuestDto()
+            ReadGuestDto readGuestDto = new ReadGuestDto
             {
-                Id = data.Id,
-                FirstName = data.FirstName,
-                LastName = data.LastName,
-                Email = data.Email,
-                DateOfBirth = data.DateOfBirth
+                Id = guest.Id,
+                FirstName = guest.FirstName,
+                LastName = guest.LastName,
+                Email = guest.Email,
+                DateOfBirth = guest.DateOfBirth,
+                Allergies = guest.Allergies.Select(a => a.ToReadAllergyDto()).ToList()
             };
 
-            foreach (var allergy in data.Allergies)
+            foreach (var allergy in guest.Allergies)
             {
                 Console.WriteLine(allergy.AllergyType);
             }
@@ -65,51 +67,29 @@ namespace EventAPIMySQL.Controllers
                 .ToListAsync();
             */
 
-            return Ok(dataDto);
+            return Ok(readGuestDto);
         }
 
         //Create A Guest
         [HttpPost]
-        public async Task<ActionResult<Guest>> CreateGuest(CreateGuestDto request)
+        public async Task<ActionResult<List<ReadGuestDto>>> CreateGuest(CreateGuestDto newGuest)
         {
-            //var guest = await;
-            var newGuest = new Guest
-            {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Email = request.Email,
-                DateOfBirth = request.DateOfBirth,
-                //Allergies = request.
-            };
-
-            _context.Guests.Add(newGuest);
+            //Add to table and save changes
+            _context.Guests.Add(newGuest.ToGuestModel());
             await _context.SaveChangesAsync();
 
-            return Ok(await _context.Guests.ToListAsync());
+            //Get lists of guests
+            var guests = await _context.Guests
+                .Include(c => c.Allergies)
+                .Include(c => c.Events)
+                .ToListAsync();
+
+            //Convert guests to ReadGuestsDto
+            var readGuestsDto = guests
+                .Select(x => x.ToReadGuestDto())
+                .ToList();
+
+            return Ok(readGuestsDto);
         }
-
-        //extension methods
-        public static ReadGuestDto ToReadGuestDto(Guest guest)
-        {
-            return new ReadGuestDto()
-            {
-                Id = guest.Id,
-                FirstName = guest.FirstName,
-                LastName = guest.LastName,
-                Email = guest.Email,
-                DateOfBirth = guest.DateOfBirth,
-                Allergies = guest.Allergies.Select(a => ToReadAllergyDto(a)).ToList()
-            };
-        }
-
-        public static ReadAllergyDto ToReadAllergyDto(Allergy allergy)
-        {
-            return new ReadAllergyDto()
-            {
-                AllergyType = allergy.AllergyType
-            };
-        }
-
-
     }
 }

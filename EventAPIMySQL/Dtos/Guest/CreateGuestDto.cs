@@ -1,4 +1,6 @@
 ﻿using EventAPIMySQL.Dtos.Allergy;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace EventAPIMySQL.Dtos.Guest
 {
@@ -10,7 +12,22 @@ namespace EventAPIMySQL.Dtos.Guest
         public DateTime DateOfBirth { get; set; }
 
         //optional, can have many
-        public List<CreateAllergyDto> Allergies { get; set; } = new List<CreateAllergyDto>();
+        public List<Models.Allergy> Allergies { get; set; } = new List<Models.Allergy>();
 
+    }
+
+    public static class CreateGuestDtoExtensions
+    {
+        public static Models.Guest ToGuestModel(this CreateGuestDto guest)
+        {
+            return new Models.Guest
+            {
+               FirstName = guest.FirstName,
+               LastName = guest.LastName,
+               Email = guest.Email,
+               DateOfBirth = guest.DateOfBirth,
+               Allergies = guest.Allergies
+            };
+        }
     }
 }
