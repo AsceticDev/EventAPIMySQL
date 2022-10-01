@@ -1,5 +1,4 @@
 ﻿using EventAPIMySQL.Data;
-using EventAPIMySQL.Dtos.Allergy;
 using EventAPIMySQL.Dtos.Guest;
 using EventAPIMySQL.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +26,7 @@ namespace EventAPIMySQL.Controllers
                 .Include(c => c.Events)
                 .ToListAsync();
 
-            var readGuestsDto = guests
+            List<ReadGuestDto> readGuestsDto = guests
                 //.Select(x => ToReadGuestDto(x))
                 .Select(x => x.ToReadGuestDto())
                 .ToList();
@@ -45,32 +44,10 @@ namespace EventAPIMySQL.Controllers
                 .FirstOrDefaultAsync(x => x.Id == guestId);
             if (guest == null) return NotFound();
 
-            ReadGuestDto readGuestDto = new ReadGuestDto
-            {
-                Id = guest.Id,
-                FirstName = guest.FirstName,
-                LastName = guest.LastName,
-                Email = guest.Email,
-                DateOfBirth = guest.DateOfBirth,
-                Allergies = guest.Allergies.Select(a => a.ToReadAllergyDto()).ToList()
-            };
-
-            foreach (var allergy in guest.Allergies)
-            {
-                Console.WriteLine(allergy.AllergyType);
-            }
-            /*
-              var guest = await _context.Guests
-                .Where(c => c.Id == guestId)
-                .Include(c => c.Allergies)
-                .Include(c => c.Events)
-                .ToListAsync();
-            */
-
-
-            return Ok(readGuestDto);
+            return Ok(guest.ToReadGuestDto());
         }
 
+        
         //Create A Guest
         [HttpPost]
         public async Task<ActionResult<List<ReadGuestDto>>> CreateGuest(CreateGuestDto newGuest)
@@ -80,17 +57,54 @@ namespace EventAPIMySQL.Controllers
             await _context.SaveChangesAsync();
 
             //Get lists of guests
-            var guests = await _context.Guests
+            List<Guest> guests = await _context.Guests
                 .Include(c => c.Allergies)
                 .Include(c => c.Events)
                 .ToListAsync();
 
             //Convert guests to ReadGuestsDto
-            var readGuestsDto = guests
+            List<ReadGuestDto> readGuestsDto = guests
                 .Select(x => x.ToReadGuestDto())
                 .ToList();
 
+
             return Ok(readGuestsDto);
+        }
+
+        [HttpPut]
+        public async Task<ActionResult<ReadGuestDto>> UpdateGuest(UpdateGuestDto updatedGuest)
+        {
+            if(updatedGuest == null) return BadRequest("Guest is null!");
+            var dbGuest = await _context.Guests.Where(i => i.Id == updatedGuest.Id).FirstOrDefaultAsync();
+            if (dbGuest == null) return NotFound();
+
+           dbGuest.FirstName = updatedGuest.FirstName;
+           dbGuest.LastName = updatedGuest.LastName;
+           dbGuest.Email = updatedGuest.Email;
+           dbGuest.DateOfBirth = updatedGuest.DateOfBirth;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            return Ok(await _context.Guests.ToListAsync());
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<List<ReadGuestDto>>> Delete(int id)
+        {
+            var dbGuest = await _context.Guests.FindAsync(id);
+            if (dbGuest == null) return BadRequest("Guest not found.");
+
+            _context.Guests.Remove(dbGuest);
+            await _context.SaveChangesAsync();
+
+            return Ok(await _context.Guests.ToListAsync());
         }
     }
 }

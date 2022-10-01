@@ -12,16 +12,4 @@ namespace EventAPIMySQL.Models
         public List<Guest> Guests { get; set; } = new List<Guest>();
     }
 
-
-    public static class AllergyModelExtensions
-    {
-        public static ReadAllergyDto ToReadAllergyDto(this Allergy allergy)
-        {
-            return new ReadAllergyDto
-            {
-                AllergyType = allergy.AllergyType
-            };
-        }
-    }
-
 }

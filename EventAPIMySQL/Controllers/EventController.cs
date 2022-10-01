@@ -7,5 +7,10 @@ namespace EventAPIMySQL.Controllers
     [ApiController]
     public class EventController : ControllerBase
     {
+            //foreach (var allergy in guest.Allergies)
+            //{
+            //    Console.WriteLine(allergy.AllergyType);
+            //}
+
     }
 }

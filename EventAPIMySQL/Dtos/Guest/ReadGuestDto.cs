@@ -32,10 +32,8 @@ namespace EventAPIMySQL.Dtos.Guest
                 LastName = guest.LastName,
                 Email = guest.Email,
                 DateOfBirth = guest.DateOfBirth,
-                //Allergies = guest.Allergies.Select(a => ReadAllergyDtoExtensions.ToReadAllergyDto(a)).ToList()
                 Allergies = guest.Allergies.Select(a => a.ToReadAllergyDto()).ToList()
             };
-
         }
     }
 

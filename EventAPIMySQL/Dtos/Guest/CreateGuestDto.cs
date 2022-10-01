@@ -12,7 +12,7 @@ namespace EventAPIMySQL.Dtos.Guest
         public DateTime DateOfBirth { get; set; }
 
         //optional, can have many
-        public List<Models.Allergy> Allergies { get; set; } = new List<Models.Allergy>();
+        public List<ReadAllergyDto> Allergies { get; set; } = new List<ReadAllergyDto>();
 
     }
 
@@ -26,7 +26,7 @@ namespace EventAPIMySQL.Dtos.Guest
                LastName = guest.LastName,
                Email = guest.Email,
                DateOfBirth = guest.DateOfBirth,
-               Allergies = guest.Allergies
+               Allergies = guest.Allergies.Select(a => a.ToAllergyModel()).ToList()
             };
         }
     }
