@@ -1,4 +1,5 @@
 ﻿using EventAPIMySQL.Data;
+using EventAPIMySQL.Dtos.Allergy;
 using EventAPIMySQL.Dtos.Guest;
 using EventAPIMySQL.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -41,7 +42,7 @@ namespace EventAPIMySQL.Controllers
             var guest = await _context.Guests
                 .Include(c=>c.Allergies)
                 .Include(c=>c.Events)
-                .FirstOrDefaultAsync(x => x.Id == guestId);
+                .FirstOrDefaultAsync(x => x.GuestId == guestId);
             if (guest == null) return NotFound();
 
             return Ok(guest.ToReadGuestDto());
@@ -53,8 +54,23 @@ namespace EventAPIMySQL.Controllers
         public async Task<ActionResult<List<ReadGuestDto>>> CreateGuest(CreateGuestDto newGuest)
         {
             //Add to table and save changes
-            _context.Guests.Add(newGuest.ToGuestModel());
+            Models.Guest guestModel = newGuest.ToGuestModel();
+            _context.Guests.Add(guestModel);
+
+            foreach (ReadAllergyDto allergy in newGuest.Allergies)
+            {
+                var dbAllergy = _context.Allergies.SingleOrDefault(b => b.AllergyType == allergy.AllergyType);
+                if(dbAllergy == null) return BadRequest("Please enter a valid allergy.");
+            }
+
             await _context.SaveChangesAsync();
+            _context.Entry(guestModel).GetDatabaseValues();
+
+            foreach (ReadAllergyDto allergy in newGuest.Allergies)
+            {
+                guestModel.Allergies.Add(allergy.ToAllergyModel());
+            }
+            
 
             //Get lists of guests
             List<Guest> guests = await _context.Guests
@@ -67,7 +83,6 @@ namespace EventAPIMySQL.Controllers
                 .Select(x => x.ToReadGuestDto())
                 .ToList();
 
-
             return Ok(readGuestsDto);
         }
 
@@ -75,22 +90,15 @@ namespace EventAPIMySQL.Controllers
         public async Task<ActionResult<ReadGuestDto>> UpdateGuest(UpdateGuestDto updatedGuest)
         {
             if(updatedGuest == null) return BadRequest("Guest is null!");
-            var dbGuest = await _context.Guests.Where(i => i.Id == updatedGuest.Id).FirstOrDefaultAsync();
+            var dbGuest = await _context.Guests.Where(i => i.GuestId == updatedGuest.GuestId).FirstOrDefaultAsync();
             if (dbGuest == null) return NotFound();
 
-           dbGuest.FirstName = updatedGuest.FirstName;
-           dbGuest.LastName = updatedGuest.LastName;
-           dbGuest.Email = updatedGuest.Email;
-           dbGuest.DateOfBirth = updatedGuest.DateOfBirth;
+            dbGuest.FirstName = updatedGuest.FirstName;
+            dbGuest.LastName = updatedGuest.LastName;
+            dbGuest.Email = updatedGuest.Email;
+            dbGuest.DateOfBirth = updatedGuest.DateOfBirth;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
+            await _context.SaveChangesAsync();
 
             return Ok(await _context.Guests.ToListAsync());
         }

@@ -1,22 +1,20 @@
-﻿using EventAPIMySQL.Dtos.Allergy;
-
-namespace EventAPIMySQL.Dtos.Guest
+﻿namespace EventAPIMySQL.Dtos.Guest
 {
-    public class UpdateGuestDto
+    public class ReadGuestEventDto
     {
         public int GuestId { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public DateTime DateOfBirth { get; set; }
+        public DateTime DateOfBirth { get; set; } = DateTime.MinValue;
     }
-
-    public static class UpdateGuestDtoExtensions
+    public static class ReadGuestEventDtoExtensions
     {
-        public static Models.Guest ToGuestModel(this UpdateGuestDto guest)
+        public static ReadGuestEventDto ToReadGuestEventDto(this Models.Guest guest)
         {
-            return new Models.Guest
+            return new ReadGuestEventDto()
             {
+                GuestId = guest.GuestId,
                 FirstName = guest.FirstName,
                 LastName = guest.LastName,
                 Email = guest.Email,
@@ -24,10 +22,11 @@ namespace EventAPIMySQL.Dtos.Guest
             };
         }
 
-        public static UpdateGuestDto ToUpdateGuestDto(this Models.Guest guest)
+        public static Models.Guest ToGuestModel(this ReadGuestEventDto guest)
         {
-            return new UpdateGuestDto
+            return new Models.Guest ()
             {
+                GuestId = guest.GuestId,
                 FirstName = guest.FirstName,
                 LastName = guest.LastName,
                 Email = guest.Email,
@@ -35,4 +34,5 @@ namespace EventAPIMySQL.Dtos.Guest
             };
         }
     }
+
 }

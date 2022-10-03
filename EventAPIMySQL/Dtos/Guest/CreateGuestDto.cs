@@ -1,6 +1,4 @@
 ﻿using EventAPIMySQL.Dtos.Allergy;
-using Microsoft.EntityFrameworkCore;
-
 
 namespace EventAPIMySQL.Dtos.Guest
 {
@@ -12,7 +10,7 @@ namespace EventAPIMySQL.Dtos.Guest
         public DateTime DateOfBirth { get; set; }
 
         //optional, can have many
-        public List<ReadAllergyDto> Allergies { get; set; } = new List<ReadAllergyDto>();
+        public ICollection<ReadAllergyDto> Allergies { get; set; } = new List<ReadAllergyDto>();
 
     }
 
@@ -26,7 +24,6 @@ namespace EventAPIMySQL.Dtos.Guest
                LastName = guest.LastName,
                Email = guest.Email,
                DateOfBirth = guest.DateOfBirth,
-               Allergies = guest.Allergies.Select(a => a.ToAllergyModel()).ToList()
             };
         }
     }

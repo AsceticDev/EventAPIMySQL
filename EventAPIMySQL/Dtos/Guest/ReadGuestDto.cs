@@ -6,7 +6,7 @@ namespace EventAPIMySQL.Dtos.Guest
 {
     public class ReadGuestDto
     {
-        public int Id { get; set; }
+        public int GuestId { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
 
@@ -16,18 +16,18 @@ namespace EventAPIMySQL.Dtos.Guest
         public DateTime DateOfBirth { get; set; }
 
         //optional, can have many
-        public List<ReadAllergyDto> Allergies { get; set; } = new List<ReadAllergyDto>();
+        public ICollection<ReadAllergyDto> Allergies { get; set; } = new List<ReadAllergyDto>();
 
         //will not add events when creating a guest, will add them when creating the event itself
-        public List<ReadEventDto> Events { get; set; } = new List<ReadEventDto>();
+        public ICollection<ReadEventDto> Events { get; set; } = new List<ReadEventDto>();
     }
-    public static class ReadGuestDtoExtension
+    public static class ReadGuestDtoExtensions
     {
         public static ReadGuestDto ToReadGuestDto(this Models.Guest guest)
         {
-            return new ReadGuestDto()
+            return new ReadGuestDto
             {
-                Id = guest.Id,
+                GuestId = guest.GuestId,
                 FirstName = guest.FirstName,
                 LastName = guest.LastName,
                 Email = guest.Email,
@@ -35,6 +35,14 @@ namespace EventAPIMySQL.Dtos.Guest
                 Allergies = guest.Allergies.Select(a => a.ToReadAllergyDto()).ToList()
             };
         }
+        public static Models.Guest ToGuestModel(this ReadGuestDto guest)
+        {
+            return new Models.Guest
+            {
+                GuestId = guest.GuestId
+            };
+        }
+
     }
 
 
