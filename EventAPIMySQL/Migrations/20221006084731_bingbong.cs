@@ -4,7 +4,7 @@
 
 namespace EventAPIMySQL.Migrations
 {
-    public partial class GuestAllergy : Migration
+    public partial class bingbong : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

@@ -3,12 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EventAPIMySQL.Models
 {
-    public class GuestAllergy
+    public class EventGuest
     {
+        public int EventId { get; set; }
         public int GuestId { get; set; }
-        public int AllergyId { get; set; }
-        public Guest Guest { get; set; } 
-        public Allergy Allergy { get; set; }
 
+        public Event Event{ get; set; } 
+        public Guest Guest{ get; set; }
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventAPIMySQL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20221003062036_GuestEvent1")]
-    partial class GuestEvent1
+    [Migration("20221005014318_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,35 +24,20 @@ namespace EventAPIMySQL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("AllergyGuest", b =>
-                {
-                    b.Property<int>("AllergiesAllergyId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("GuestsGuestId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AllergiesAllergyId", "GuestsGuestId");
-
-                    b.HasIndex("GuestsGuestId");
-
-                    b.ToTable("AllergyGuest");
-                });
-
             modelBuilder.Entity("EventAPIMySQL.Models.Allergy", b =>
                 {
-                    b.Property<int>("AllergyId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AllergyId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("AllergyType")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.HasKey("AllergyId");
+                    b.HasKey("Id");
 
                     b.HasIndex("AllergyType")
                         .IsUnique();
@@ -62,11 +47,11 @@ namespace EventAPIMySQL.Migrations
 
             modelBuilder.Entity("EventAPIMySQL.Models.Event", b =>
                 {
-                    b.Property<int>("EventId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<DateTime>("EventDate")
                         .HasColumnType("datetime2");
@@ -76,7 +61,7 @@ namespace EventAPIMySQL.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.HasKey("EventId");
+                    b.HasKey("Id");
 
                     b.HasIndex("EventName")
                         .IsUnique();
@@ -84,13 +69,33 @@ namespace EventAPIMySQL.Migrations
                     b.ToTable("Events");
                 });
 
+            modelBuilder.Entity("EventAPIMySQL.Models.EventGuest", b =>
+                {
+                    b.Property<int>("EventId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GuestId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GuestId1")
+                        .HasColumnType("int");
+
+                    b.HasKey("EventId", "GuestId");
+
+                    b.HasIndex("GuestId");
+
+                    b.HasIndex("GuestId1");
+
+                    b.ToTable("GuestEvents");
+                });
+
             modelBuilder.Entity("EventAPIMySQL.Models.Guest", b =>
                 {
-                    b.Property<int>("GuestId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GuestId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
@@ -109,7 +114,7 @@ namespace EventAPIMySQL.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.HasKey("GuestId");
+                    b.HasKey("Id");
 
                     b.HasIndex("Email")
                         .IsUnique();
@@ -117,49 +122,79 @@ namespace EventAPIMySQL.Migrations
                     b.ToTable("Guests");
                 });
 
-            modelBuilder.Entity("EventGuest", b =>
+            modelBuilder.Entity("EventAPIMySQL.Models.GuestAllergy", b =>
                 {
-                    b.Property<int>("EventsEventId")
+                    b.Property<int>("GuestId")
                         .HasColumnType("int");
 
-                    b.Property<int>("GuestsGuestId")
+                    b.Property<int>("AllergyId")
                         .HasColumnType("int");
 
-                    b.HasKey("EventsEventId", "GuestsGuestId");
+                    b.Property<int>("AllergyId1")
+                        .HasColumnType("int");
 
-                    b.HasIndex("GuestsGuestId");
+                    b.HasKey("GuestId", "AllergyId");
 
-                    b.ToTable("EventGuest");
+                    b.HasIndex("AllergyId");
+
+                    b.HasIndex("AllergyId1");
+
+                    b.ToTable("GuestAllergies");
                 });
 
-            modelBuilder.Entity("AllergyGuest", b =>
+            modelBuilder.Entity("EventAPIMySQL.Models.EventGuest", b =>
                 {
-                    b.HasOne("EventAPIMySQL.Models.Allergy", null)
-                        .WithMany()
-                        .HasForeignKey("AllergiesAllergyId")
+                    b.HasOne("EventAPIMySQL.Models.Event", "Event")
+                        .WithMany("EventGuests")
+                        .HasForeignKey("GuestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EventAPIMySQL.Models.Guest", null)
-                        .WithMany()
-                        .HasForeignKey("GuestsGuestId")
+                    b.HasOne("EventAPIMySQL.Models.Guest", "Guest")
+                        .WithMany("EventGuests")
+                        .HasForeignKey("GuestId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Event");
+
+                    b.Navigation("Guest");
                 });
 
-            modelBuilder.Entity("EventGuest", b =>
+            modelBuilder.Entity("EventAPIMySQL.Models.GuestAllergy", b =>
                 {
-                    b.HasOne("EventAPIMySQL.Models.Event", null)
-                        .WithMany()
-                        .HasForeignKey("EventsEventId")
+                    b.HasOne("EventAPIMySQL.Models.Guest", "Guest")
+                        .WithMany("GuestAllergies")
+                        .HasForeignKey("AllergyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EventAPIMySQL.Models.Guest", null)
-                        .WithMany()
-                        .HasForeignKey("GuestsGuestId")
+                    b.HasOne("EventAPIMySQL.Models.Allergy", "Allergy")
+                        .WithMany("GuestAllergies")
+                        .HasForeignKey("AllergyId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Allergy");
+
+                    b.Navigation("Guest");
+                });
+
+            modelBuilder.Entity("EventAPIMySQL.Models.Allergy", b =>
+                {
+                    b.Navigation("GuestAllergies");
+                });
+
+            modelBuilder.Entity("EventAPIMySQL.Models.Event", b =>
+                {
+                    b.Navigation("EventGuests");
+                });
+
+            modelBuilder.Entity("EventAPIMySQL.Models.Guest", b =>
+                {
+                    b.Navigation("EventGuests");
+
+                    b.Navigation("GuestAllergies");
                 });
 #pragma warning restore 612, 618
         }
