@@ -15,6 +15,6 @@ namespace EventAPIMySQL.Models
         [DisplayFormat(ApplyFormatInEditMode=true, DataFormatString = "{0:d}")]
         public DateTime EventDate { get; set; } = DateTime.MinValue;
 
-        public ICollection<EventGuest> EventGuests { get; set; }
+        public ICollection<EventGuest> GuestEvents { get; set; }
     }
 }

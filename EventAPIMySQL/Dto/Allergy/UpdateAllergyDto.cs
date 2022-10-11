@@ -1,9 +1,8 @@
-﻿namespace EventAPIMySQL.Dtos
+﻿namespace EventAPIMySQL.Dto.Allergy
 {
-    public class CreateAllergyGuestDto
+    public class UpdateAllergyDto
     {
         public int id { get; set; }
         public string AllergyType { get; set; }
-
     }
 }

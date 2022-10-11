@@ -1,4 +1,5 @@
 ﻿using EventAPIMySQL.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventAPIMySQL.Data
@@ -18,19 +19,30 @@ namespace EventAPIMySQL.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<GuestAllergy>().HasKey(ga => new { ga.GuestId, ga.AllergyId});
+
             modelBuilder.Entity<GuestAllergy>()
-                .HasKey(ga => new { ga.GuestId, ga.AllergyId});
+                .HasOne(ga => ga.Guest)
+                .WithMany(g => g.GuestAllergies)
+                .HasForeignKey(ga => ga.GuestId);
             modelBuilder.Entity<GuestAllergy>()
-                .HasOne(g => g.Guest)
+                .HasOne(g=>g.Allergy)
                 .WithMany(ga => ga.GuestAllergies)
-                .HasForeignKey(a => a.GuestId);
+                .HasForeignKey(ga => ga.AllergyId);
+
+
+            modelBuilder.Entity<EventGuest>().HasKey(eg => new { eg.EventId, eg.GuestId });
 
             modelBuilder.Entity<EventGuest>()
-                .HasKey(eg => new { eg.EventId, eg.GuestId });
+                .HasOne(e => e.Guest)
+                .WithMany(eg => eg.GuestEvents)
+                .HasForeignKey(e => e.GuestId);
             modelBuilder.Entity<EventGuest>()
-                .HasOne(e => e.Event)
-                .WithMany(eg => eg.EventGuests)
-                .HasForeignKey(e => e.EventId);
+                .HasOne(g=>g.Event)
+                .WithMany(ga => ga.GuestEvents)
+                .HasForeignKey(ga => ga.EventId);
+
         }
     }
 }

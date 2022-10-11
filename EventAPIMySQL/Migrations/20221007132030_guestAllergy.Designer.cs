@@ -4,6 +4,7 @@ using EventAPIMySQL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventAPIMySQL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20221007132030_guestAllergy")]
+    partial class guestAllergy
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -133,13 +135,13 @@ namespace EventAPIMySQL.Migrations
             modelBuilder.Entity("EventAPIMySQL.Models.EventGuest", b =>
                 {
                     b.HasOne("EventAPIMySQL.Models.Event", "Event")
-                        .WithMany("GuestEvents")
+                        .WithMany("EventGuests")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("EventAPIMySQL.Models.Guest", "Guest")
-                        .WithMany("GuestEvents")
+                        .WithMany("EventGuests")
                         .HasForeignKey("GuestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -175,14 +177,14 @@ namespace EventAPIMySQL.Migrations
 
             modelBuilder.Entity("EventAPIMySQL.Models.Event", b =>
                 {
-                    b.Navigation("GuestEvents");
+                    b.Navigation("EventGuests");
                 });
 
             modelBuilder.Entity("EventAPIMySQL.Models.Guest", b =>
                 {
-                    b.Navigation("GuestAllergies");
+                    b.Navigation("EventGuests");
 
-                    b.Navigation("GuestEvents");
+                    b.Navigation("GuestAllergies");
                 });
 #pragma warning restore 612, 618
         }

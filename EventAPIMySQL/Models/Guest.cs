@@ -24,6 +24,6 @@ namespace EventAPIMySQL.Models
         public ICollection<GuestAllergy> GuestAllergies { get; set; }
 
         //wouldnt add events when creating a character
-        public ICollection<EventGuest> EventGuests { get; set; } 
+        public ICollection<EventGuest> GuestEvents { get; set; } 
     }
 }
