@@ -16,13 +16,11 @@ namespace EventAPIMySQL.Controllers
         private readonly IGuestRepository _guestRepository;
         private readonly IEventRepository _eventRepository;
         private readonly IAllergyRepository _allergyRepository;
-        private readonly IMapper _mapper;
-        public GuestController(IGuestRepository guestRepository,IAllergyRepository allergyRepository, IEventRepository eventRepository, IMapper mapper)
+        public GuestController(IGuestRepository guestRepository,IAllergyRepository allergyRepository, IEventRepository eventRepository)
         {
             _guestRepository = guestRepository;
             _allergyRepository = allergyRepository;
             _eventRepository = eventRepository;
-            _mapper = mapper;
         }
 
         [HttpGet]
@@ -86,8 +84,6 @@ namespace EventAPIMySQL.Controllers
                     if (!_allergyRepository.AllergyExists(item.AllergyType))
                         return BadRequest("The Allergy Type you entered is Invalid.");
                     allergyList.Add(item);
-                    //if not send error invalid allergy.
-                    //if it does add it to the guest.
                 }
             };
 
@@ -115,7 +111,7 @@ namespace EventAPIMySQL.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public IActionResult UpdateGuest([FromBody]GuestDto updatedGuest)
+        public IActionResult UpdateGuest([FromBody]UpdateGuestDto updatedGuest)
         {
             if (updatedGuest == null)
             {
@@ -130,17 +126,45 @@ namespace EventAPIMySQL.Controllers
                 return BadRequest();
             }
 
-            var guestMap = _mapper.Map<Guest>(updatedGuest);
+            Guest updatedGuestModel = updatedGuest.ToGuestModel();
 
-            if(!_guestRepository.UpdateGuest(guestMap))
+            if (updatedGuest.allergies.Count() > 0)
             {
-                ModelState.AddModelError("", "Something went wrong updating guest.");
-                return StatusCode(500, ModelState);
+                var guestAllergiesDb = _allergyRepository.GetAllergiesByGuest(updatedGuest.Id);
+                List<UpdateAllergyDto> currentGuestAllergies = guestAllergiesDb.Select(a => a.ToUpdateAllergyDto()).ToList();
+                List<UpdateAllergyDto> addAllergyList = new List<UpdateAllergyDto>();
+                List<UpdateAllergyDto> removeAllergyList = new List<UpdateAllergyDto>();
+                Console.WriteLine("updated guest allergies: ");
+                //for each allergy in updated list
+                foreach(UpdateAllergyDto allergy in updatedGuest.allergies)
+                {
+                    if (!currentGuestAllergies.Any(a=>a.AllergyType == allergy.AllergyType))
+                    {
+                        Console.WriteLine($"No match! \n{allergy.AllergyType} not in currentGuestAllergies...\nAdding to current allergies...");
+                        addAllergyList.Add(allergy);
+                    }
+                }
+
+                //for each allergy in current list
+                foreach(UpdateAllergyDto allergy in currentGuestAllergies)
+                {
+                    //if updated guest allergies contain current allergy
+                    if(!updatedGuest.allergies.Any(a=>a.AllergyType == allergy.AllergyType))
+                    {
+                        Console.WriteLine($"No match! \n{allergy.AllergyType} not in updatedGuest.Allergies...\nDeleting from current allergies...");
+                        removeAllergyList.Add(allergy);
+                    }
+                }
+
+                //update guest and guest allergies
+                if (!_guestRepository.UpdateGuestAllergies(updatedGuest, addAllergyList, removeAllergyList) && !_guestRepository.UpdateGuest(updatedGuest.ToGuestModel()))
+                {
+                    ModelState.AddModelError("", "Something went wrong while saving...");
+                    return StatusCode(500, ModelState);
+                }
             }
 
-
-            var guestDb = _mapper.Map<GuestDto>(_guestRepository.GetGuest(updatedGuest.Id));
-            //var guestDb = _guestRepository.GetGuest(updatedGuest.Id);
+            ReadGuestDto guestDb = _guestRepository.GetGuest(updatedGuest.Id).ToReadGuestDto();
 
             return Ok(guestDb);
         }

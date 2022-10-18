@@ -69,5 +69,9 @@ namespace EventAPIMySQL.Repository
             return Save();
         }
 
+        public ICollection<Allergy> GetAllergiesByGuest(int guestId)
+        {
+            return _context.GuestAllergies.Where(a => a.GuestId == guestId).Select(g => g.Allergy).ToList();
+        }
     }
 }

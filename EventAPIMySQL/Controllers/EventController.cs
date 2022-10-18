@@ -13,23 +13,23 @@ namespace EventAPIMySQL.Controllers
     public class EventController : ControllerBase
     {
         private readonly IEventRepository _eventRepository;
-        private readonly IMapper _mapper;
-        public EventController(IEventRepository eventRepository, IMapper mapper)
+        public EventController(IEventRepository eventRepository)
         {
             _eventRepository = eventRepository;
-            _mapper = mapper;
         }
 
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Event>))]
         public IActionResult GetEvents()
         {
-            var events = _mapper.Map<List<EventDto>>(_eventRepository.GetEvents());
+            var eventsDb = _eventRepository.GetEvents();
+
+            List<ReadEventDto> readEvents = eventsDb.Select(a => a.ToReadEventDto()).ToList();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return Ok(events);
+            return Ok(readEvents);
         }
 
         [HttpGet("{eventId}")]
@@ -40,12 +40,12 @@ namespace EventAPIMySQL.Controllers
             if (!_eventRepository.EventExists(eventId))
                 return NotFound();
 
-            var eventObj = _mapper.Map<EventDto>(_eventRepository.GetEvent(eventId));
+            var eventDb = _eventRepository.GetEvent(eventId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return Ok(eventObj);
+            return Ok(eventDb.ToReadEventDto());
         }
 
 

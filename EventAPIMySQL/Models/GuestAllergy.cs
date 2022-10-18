@@ -13,16 +13,16 @@ namespace EventAPIMySQL.Models
         public Allergy Allergy { get; set; }
 
     }
-    public static class GuestAllergyExtensions
-    {
-        public static ReadAllergyDto ToReadAllergyDto(this GuestAllergy guestAllergy)
-        {
-            return new ReadAllergyDto
-            {
-                id = guestAllergy.AllergyId,
-                AllergyType = guestAllergy.Allergy.AllergyType
-            };
-        }
-    }
+    //public static class GuestAllergyExtensions
+    //{
+    //    public static ReadAllergyDto ToReadAllergyDto(this GuestAllergy guestAllergy)
+    //    {
+    //        return new ReadAllergyDto
+    //        {
+    //            Id = guestAllergy.AllergyId,
+    //            AllergyType = guestAllergy.Allergy.AllergyType
+    //        };
+    //    }
+    //}
 
 }

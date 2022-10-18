@@ -8,12 +8,12 @@ namespace EventAPIMySQL.Interfaces
     {
         ICollection<Guest> GetGuests();
         //ICollection<Guest> GetGuest(string lastName);
-        ICollection<Guest> GetGuestByAllergy(string allergyType);
-        ICollection<Guest> GetGuestByEvent(int eventId);
-
-        bool AddAllergiesToGuest(int guestId, List<CreateAllergyDto> allergies);
+        ICollection<Guest> GetGuestsByAllergy(string allergyType);
+        ICollection<Guest> GetGuestsByEvent(int eventId);
         Guest GetGuestByEmailTrimToUpper(CreateGuestDto guestCreate);
         Guest GetGuest(int guestId);
+        bool AddAllergiesToGuest(int guestId, List<CreateAllergyDto> allergies);
+        bool UpdateGuestAllergies(UpdateGuestDto updatedGuest, List<UpdateAllergyDto> allergyListToAdd, List<UpdateAllergyDto> allergyListToRemove);
         bool GuestExists(int guestId);
         bool CreateGuest(Guest guest);
         bool UpdateGuest(Guest guest);

@@ -98,7 +98,7 @@ namespace EventAPIMySQL.Repository
             return saved > 0 ? true : false;
         }
 
-        public ICollection<Guest> GetGuestByAllergy(string allergyType)
+        public ICollection<Guest> GetGuestsByAllergy(string allergyType)
         {
             return _context.GuestAllergies
                 .Where(a => a.Allergy.AllergyType == allergyType)
@@ -106,7 +106,7 @@ namespace EventAPIMySQL.Repository
                 .ToList();
         }
 
-        public ICollection<Guest> GetGuestByEvent(int eventId)
+        public ICollection<Guest> GetGuestsByEvent(int eventId)
         {
             return _context.GuestEvents.Where(a => a.Event.Id == eventId).Select(g => g.Guest).ToList();
         }
@@ -120,16 +120,13 @@ namespace EventAPIMySQL.Repository
         public bool AddAllergiesToGuest(int guestId, List<CreateAllergyDto> allergies)
         {
             //
-            var guestDb = _context.Guests.Where(g=>g.Id == guestId).FirstOrDefault();
-            foreach(CreateAllergyDto allergy in allergies)
+            var guestDb = _context.Guests.Where(g => g.Id == guestId).FirstOrDefault();
+            foreach (CreateAllergyDto allergy in allergies)
             {
                 var allergyDb = _context.Allergies.Where(a => a.AllergyType == allergy.AllergyType).FirstOrDefault();
-                Console.WriteLine($"Allergy ID: {allergyDb.Id}, Allergy Type: {allergyDb.AllergyType}");
 
                 if (allergyDb != null && guestDb != null)
                 {
-                    Console.WriteLine("####################");
-                    Console.WriteLine("We inside not null");
                     GuestAllergy gaItem = new GuestAllergy()
                     {
                         AllergyId = allergyDb.Id,
@@ -137,16 +134,81 @@ namespace EventAPIMySQL.Repository
                     };
                     _context.GuestAllergies.Add(gaItem);
                 }
-                else
-                {
-                    Console.WriteLine("DB var is null!!");
-                    Console.WriteLine("guestId: " + guestId);
-                    return false;
-                }
+                else return false;
             }
             return Save();
         }
 
+        public bool UpdateGuestAllergies(UpdateGuestDto updatedGuest, List<UpdateAllergyDto> allergyListToAdd, List<UpdateAllergyDto> allergyListToRemove)
+        {
+
+            List<GuestAllergy> guestAllergiesDb = _context.GuestAllergies.Where(ga=>ga.GuestId == updatedGuest.Id).ToList();
+
+            if (updatedGuest.allergies == null || updatedGuest.allergies.Count() == 0) return false;
+            if(!GuestExists(updatedGuest.Id))
+            {
+                Console.WriteLine($"Invalid Guest! ID: {updatedGuest.Id}");
+                return false;
+            }
+
+
+            if (allergyListToAdd != null)
+            {
+                foreach (UpdateAllergyDto allergy in allergyListToAdd)
+                {
+                    var allergyDb = _context.Allergies.Where(a => a.AllergyType == allergy.AllergyType).FirstOrDefault();
+                    bool allergyDbExists = _context.Allergies.Any(a => a.AllergyType == allergy.AllergyType);
+
+                    //does the allergy exist? if so add the relationship between allergy-guest
+                    if (!allergyDbExists)
+                    {
+                        Console.WriteLine($"Allergy {allergy.AllergyType} does not exist.");
+                        return false;
+                    }
+                    if (allergyDb != null && guestAllergiesDb != null)
+                    {
+                        Console.WriteLine("allergyDb and guestAllergiesDb are not null");
+                        GuestAllergy gaItem = new GuestAllergy()
+                        {
+                            AllergyId = allergy.Id,
+                            GuestId = updatedGuest.Id
+                        };
+                        _context.GuestAllergies.Add(gaItem);
+                    }
+                    else return false;
+                }
+            }
+            
+            if (allergyListToRemove!= null)
+            {
+                foreach (UpdateAllergyDto allergy in allergyListToRemove)
+                {
+                    var allergyDb = _context.Allergies.Where(a => a.AllergyType == allergy.AllergyType).FirstOrDefault();
+                    bool allergyDbExists = _context.Allergies.Any(a => a.AllergyType == allergy.AllergyType);
+
+                    if (!allergyDbExists)
+                    {
+                        Console.WriteLine($"Allergy {allergy.AllergyType} does not exist.");
+                        return false;
+                    }
+
+                    if (allergyDb != null && guestAllergiesDb != null)
+                    {
+                        Console.WriteLine("allergyDb and guestAllergiesDb are not null");
+                        var gaItem = _context.GuestAllergies.Where(a=>a.GuestId == updatedGuest.Id && a.AllergyId == allergy.Id).FirstOrDefault();
+                        if (gaItem != null)
+                        {
+                            _context.GuestAllergies.Remove(gaItem);
+                        }
+                        else return false;
+                    }
+                    else return false;
+                }
+
+            }
+
+            return Save();
+        }
 
     }
 }

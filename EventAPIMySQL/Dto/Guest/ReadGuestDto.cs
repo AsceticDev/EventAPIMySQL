@@ -27,7 +27,7 @@ namespace EventAPIMySQL.Dto.Guest
                 LastName = guest.LastName,
                 Email = guest.Email,
                 DateOfBirth = guest.DateOfBirth,
-                Allergies = guest.GuestAllergies.Select(ga=>ga.ToReadAllergyDto()).ToList(),
+                Allergies = guest.GuestAllergies.Select(ga=>ga.GuestAllergyToReadAllergyDto()).ToList(),
                 Events = guest.GuestEvents.Select(ga=>ga.ToReadEventDto()).ToList()
             };
         }

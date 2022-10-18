@@ -5,6 +5,7 @@ namespace EventAPIMySQL.Interfaces
     public interface IAllergyRepository
     {
         ICollection<Allergy> GetAllergies();
+        ICollection<Allergy> GetAllergiesByGuest(int guestId);
         Allergy GetAllergy(int allergyId);
         Allergy GetAllergy(string allergyType);
         bool AllergyExists(int allergyId);

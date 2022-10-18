@@ -11,23 +11,23 @@ namespace EventAPIMySQL.Controllers
     public class AllergyController : Controller
     {
         private readonly IAllergyRepository _allergyRepository;
-        private readonly IMapper _mapper;
-        public AllergyController(IAllergyRepository allergyRepository, IMapper mapper)
+        public AllergyController(IAllergyRepository allergyRepository)
         {
             _allergyRepository = allergyRepository;
-            _mapper = mapper;
         }
 
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Allergy>))]
         public IActionResult GetAllergies()
         {
-            var allergies = _mapper.Map<List<AllergyDto>>(_allergyRepository.GetAllergies());
+            var allergiesDb = _allergyRepository.GetAllergies();
+
+            List<ReadAllergyDto> readAllergies = allergiesDb.Select(a => a.ToReadAllergyDto()).ToList();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return Ok(allergies);
+            return Ok(readAllergies);
         }
 
         [HttpGet("{allergyId}")]
@@ -38,12 +38,13 @@ namespace EventAPIMySQL.Controllers
             if (!_allergyRepository.AllergyExists(allergyId))
                 return NotFound();
 
-            var allergy = _mapper.Map<AllergyDto>(_allergyRepository.GetAllergy(allergyId));
+
+            var allergyDb = _allergyRepository.GetAllergy(allergyId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return Ok(allergy);
+            return Ok(allergyDb.ToReadAllergyDto());
         }
     }
 }
