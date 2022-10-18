@@ -50,33 +50,6 @@ namespace EventAPIMySQL.Repository
 
         public bool CreateGuest(Guest guest)
         {
-
-            //if(guest.allergies)
-            //var allergy = _context.Allergies.Where(g => g.Id == allergyId).FirstOrDefault();
-            //var eventO = _context.Events.Where(g => g.Id == eventId).FirstOrDefault();
-
-            //if (allergy != null)
-            //{
-            //    var guestAllergy = new GuestAllergy()
-            //    {
-            //        Allergy = allergy,
-            //        Guest = guest,
-            //    };
-
-            //    _context.Add(guestAllergy);
-            //}
-            //if (eventO != null)
-            //{
-
-            //    var eventGuest = new EventGuest()
-            //    {
-            //        Event = eventO,
-            //        Guest = guest,
-            //    };
-
-            //    _context.Add(eventGuest);
-            //}
-
             _context.Add(guest);
             return Save();
         }
